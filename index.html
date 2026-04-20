@@ -227,6 +227,87 @@
   .toast-success { background: #1b5e20; color: white; }
   .toast-error   { background: #b71c1c; color: white; }
 
+  /* ── TABLET (≤ 900px) ──────────────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .summary-bar { grid-template-columns: repeat(3, 1fr); }
+    .upload-hint { display: none; }
+    .legend { gap: 12px; }
+  }
+
+  /* ── MOBILE (≤ 640px) ───────────────────────────────────────────────────── */
+  @media (max-width: 640px) {
+    /* global side margins */
+    .upload-bar, .summary-bar, .alert-banner,
+    .legend, .controls, .table-wrap { margin-left: 12px; margin-right: 12px; }
+    .summary-bar { padding-top: 14px; }
+
+    /* header */
+    .header { padding: 14px 16px; flex-wrap: wrap; gap: 8px; }
+    .header-logo { width: 40px; height: 40px; font-size: 20px; border-radius: 9px; }
+    .header h1 { font-size: 16px; }
+    .header .header-sub { font-size: 11px; }
+    /* clock moves below, compact */
+    .header-right { width: 100%; text-align: left; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 8px; display: flex; align-items: baseline; gap: 10px; }
+    .header-date { font-size: 11.5px; }
+    .header-time { font-size: 13px; margin-top: 0; }
+    .company-tag { display: none; }
+
+    /* cards — 2-col grid, Total card spans full width */
+    .summary-bar { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .card-total  { grid-column: span 2; }
+    .card { padding: 13px 14px; gap: 12px; }
+    .card-icon { width: 38px; height: 38px; font-size: 18px; border-radius: 9px; }
+    .card-val   { font-size: 24px; }
+    .card-label { font-size: 10px; letter-spacing: 0.3px; }
+
+    /* upload */
+    .upload-bar { flex-direction: column; align-items: stretch; gap: 10px; padding: 12px; margin-top: 14px; }
+    .upload-zone { padding: 10px 14px; }
+    .upload-text strong { font-size: 13px; }
+    .upload-text span { font-size: 11px; }
+    .file-loaded { justify-content: center; }
+
+    /* alert */
+    .alert-banner { margin-top: 12px; padding: 11px 14px; font-size: 12.5px; }
+
+    /* legend */
+    .legend { margin: 10px 12px 0; gap: 8px; }
+    .legend-item { font-size: 11px; }
+
+    /* filter controls */
+    .controls { margin-top: 12px; gap: 7px; }
+    .search-wrap { flex: none; width: 100%; min-width: unset; }
+    .filter-btn { padding: 7px 11px; font-size: 12px; }
+
+    /* table wrapper — horizontal scroll */
+    .table-wrap { margin: 10px 12px 24px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .table-header { flex-wrap: wrap; gap: 8px; padding: 12px 14px; }
+    .table-title { font-size: 14px; }
+    .table-sub   { font-size: 11px; }
+    .table-actions { width: 100%; }
+    .action-btn  { flex: 1; text-align: center; font-size: 12px; padding: 7px 10px; }
+
+    /* table cells — tighter padding */
+    thead th { padding: 9px 10px; font-size: 10px; }
+    tbody tr.ep-row td { padding: 10px 10px; font-size: 12.5px; }
+    .dp-row td  { padding: 8px 10px; font-size: 12px; }
+    .dp-row td:nth-child(2) { padding-left: 36px; }
+    .dp-header td:first-child { padding-left: 36px; }
+
+    /* hide the standalone FIN column (col 3) — it's already shown
+       inside the name cell as .emp-fin, so no info is lost */
+    thead th:nth-child(3),
+    tbody tr.ep-row td:nth-child(3),
+    .dp-row td:nth-child(3) { display: none; }
+
+    /* shrink badges a touch */
+    .badge { font-size: 10.5px; padding: 2px 7px; }
+    .dep-chip { font-size: 10.5px; padding: 2px 7px; }
+
+    /* footer */
+    .footer { font-size: 10.5px; padding: 12px 16px; }
+  }
+
   /* PRINT */
   @media print {
     .controls, .action-btn, .expand-toggle, .legend, .upload-bar { display: none; }
