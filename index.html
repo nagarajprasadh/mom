@@ -4,454 +4,1227 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EP / DP Expiry Dashboard · Intellect Design Arena</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; color: #1a2332; }
+/* ── RESET & BASE ──────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  /* HEADER */
-  .header {
-    background: linear-gradient(135deg, #1a3a5c 0%, #0d5ea6 100%);
-    color: white; padding: 20px 32px;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .header-left { display: flex; align-items: center; gap: 16px; }
-  .header-logo {
-    width: 52px; height: 52px; background: rgba(255,255,255,0.15);
-    border-radius: 12px; display: flex; align-items: center; justify-content: center;
-    font-size: 24px;
-  }
-  .header h1 { font-size: 21px; font-weight: 700; letter-spacing: 0.3px; }
-  .header .header-sub { font-size: 12.5px; opacity: 0.75; margin-top: 3px; }
-  .header-right { text-align: right; }
-  .header-date { font-size: 12.5px; opacity: 0.8; }
-  .header-time { font-size: 17px; font-weight: 700; margin-top: 2px; font-variant-numeric: tabular-nums; }
-  .company-tag { font-size: 11px; opacity: 0.6; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.8px; }
+:root {
+  --green:       #1B4D3E;
+  --green-mid:   #2A6B57;
+  --green-light: #3D8B72;
+  --gold:        #C4973A;
+  --gold-light:  #E8B84B;
+  --red-dot:     #E8472A;
+  --cream:       #F7F4EF;
+  --white:       #FFFFFF;
+  --gray-light:  #EEF0EE;
+  --gray-text:   #6B7B74;
+  --text-dark:   #1A2420;
+  --critical:    #C0392B;
+  --critical-bg: #FEF0EF;
+  --urgent:      #D35400;
+  --urgent-bg:   #FFF3EB;
+  --warning:     #B7860B;
+  --warning-bg:  #FFFAED;
+  --ok:          #1B4D3E;
+  --ok-bg:       #EBF5F1;
+}
 
-  /* SUMMARY CARDS */
-  .summary-bar { padding: 24px 32px 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
-  .card {
-    background: white; border-radius: 12px; padding: 18px 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.07); display: flex; align-items: center; gap: 14px;
-    border-left: 4px solid transparent; cursor: pointer; transition: box-shadow 0.2s, transform 0.15s;
-  }
-  .card:hover { box-shadow: 0 6px 18px rgba(0,0,0,0.12); transform: translateY(-2px); }
-  .card-icon { width: 46px; height: 46px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 21px; flex-shrink: 0; }
-  .card-val { font-size: 30px; font-weight: 800; line-height: 1; }
-  .card-label { font-size: 11px; color: #6b7a8d; margin-top: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+html { scroll-behavior: smooth; }
 
-  .card-total    { border-color: #0d5ea6; } .card-total    .card-icon { background: #e8f1fb; }
-  .card-critical { border-color: #e53935; } .card-critical .card-icon { background: #fdecea; }
-  .card-urgent   { border-color: #f57c00; } .card-urgent   .card-icon { background: #fff3e0; }
-  .card-warning  { border-color: #f9a825; } .card-warning  .card-icon { background: #fffde7; }
-  .card-ok       { border-color: #2e7d32; } .card-ok       .card-icon { background: #e8f5e9; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--cream);
+  color: var(--text-dark);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
 
-  /* ALERT BANNER */
-  .alert-banner {
-    margin: 20px 32px 0;
-    border-radius: 10px; padding: 13px 20px;
-    display: flex; align-items: flex-start; gap: 12px; font-size: 13.5px;
-  }
-  .alert-critical { background: #fdecea; border: 1px solid #ef9a9a; color: #7f0000; }
-  .alert-warning  { background: #fff8e1; border: 1px solid #ffe082; color: #5f4700; }
-  .alert-ok       { background: #e8f5e9; border: 1px solid #a5d6a7; color: #1b5e20; }
-  .alert-icon { font-size: 18px; margin-top: 1px; }
-  .alert-body strong { display: block; margin-bottom: 3px; }
+/* ── HEADER ─────────────────────────────────────────────────────────────────── */
+.header {
+  background: var(--green);
+  padding: 0 40px;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  min-height: 80px;
+  position: relative;
+  overflow: hidden;
+}
 
-  /* CONTROLS */
-  .controls { margin: 20px 32px 0; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-  .search-wrap { position: relative; flex: 1; min-width: 240px; }
-  .search-wrap input {
-    width: 100%; padding: 9px 14px 9px 38px;
-    border: 1px solid #d0d8e4; border-radius: 8px;
-    font-size: 14px; background: white; outline: none; transition: border-color 0.2s;
-  }
-  .search-wrap input:focus { border-color: #0d5ea6; box-shadow: 0 0 0 3px rgba(13,94,166,0.1); }
-  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 15px; color: #9aaab8; }
-  .filter-btn {
-    padding: 9px 16px; border-radius: 8px; border: 1px solid #d0d8e4;
-    background: white; cursor: pointer; font-size: 13px; font-weight: 500; color: #3a4a5c;
-    transition: all 0.15s; white-space: nowrap;
-  }
-  .filter-btn:hover { border-color: #9aaab8; }
-  .filter-btn.active           { background: #0d5ea6; color: white; border-color: #0d5ea6; }
-  .filter-btn.active-critical  { background: #e53935; color: white; border-color: #e53935; }
-  .filter-btn.active-urgent    { background: #f57c00; color: white; border-color: #f57c00; }
-  .filter-btn.active-warning   { background: #f9a825; color: #333;  border-color: #f9a825; }
-  .filter-btn.active-ok        { background: #2e7d32; color: white; border-color: #2e7d32; }
+.header::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 80% 50%, rgba(196,151,58,0.12) 0%, transparent 60%);
+  pointer-events: none;
+}
 
-  /* LEGEND */
-  .legend { margin: 14px 32px 0; display: flex; gap: 20px; flex-wrap: wrap; }
-  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #6b7a8d; }
-  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+.header-accent-bar {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold) 0%, var(--gold-light) 50%, transparent 100%);
+}
 
-  /* TABLE WRAPPER */
-  .table-wrap { margin: 16px 32px 32px; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); overflow: hidden; }
-  .table-header { padding: 16px 20px; border-bottom: 1px solid #eef1f5; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-  .table-title { font-size: 15px; font-weight: 700; color: #1a2332; }
-  .table-sub   { font-size: 12px; color: #6b7a8d; margin-top: 2px; }
-  .table-actions { display: flex; gap: 8px; }
-  .action-btn {
-    padding: 7px 14px; border-radius: 7px; border: 1px solid #d0d8e4;
-    background: #f5f7fa; cursor: pointer; font-size: 12.5px; font-weight: 500; color: #3a4a5c;
-    transition: all 0.15s;
-  }
-  .action-btn:hover { background: #e8f1fb; border-color: #0d5ea6; color: #0d5ea6; }
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  z-index: 1;
+}
 
-  table { width: 100%; border-collapse: collapse; }
-  thead th {
-    background: #f5f7fa; padding: 11px 14px; text-align: left;
-    font-size: 11px; font-weight: 700; color: #6b7a8d;
-    text-transform: uppercase; letter-spacing: 0.6px;
-    border-bottom: 1px solid #eef1f5; cursor: pointer; user-select: none; white-space: nowrap;
-  }
-  thead th:hover { background: #eef1f5; }
-  thead th.sorted { color: #0d5ea6; }
-  .sort-arrow { display: inline-block; margin-left: 4px; opacity: 0.35; }
-  thead th.sorted .sort-arrow { opacity: 1; }
+.header-logo-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
-  /* EP ROW */
-  tbody tr.ep-row { cursor: pointer; transition: background 0.12s; }
-  tbody tr.ep-row:hover { background: #f8fafc; }
-  tbody tr.ep-row.expanded { background: #f0f6ff; }
-  tbody tr.ep-row td { padding: 12px 14px; border-bottom: 1px solid #f0f2f5; font-size: 13.5px; vertical-align: middle; }
+.intellect-logo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 
-  .expand-toggle {
-    width: 26px; height: 26px; border-radius: 6px; border: 1px solid #d0d8e4;
-    background: #f5f7fa; cursor: pointer; display: inline-flex; align-items: center;
-    justify-content: center; font-size: 11px; transition: all 0.18s; color: #6b7a8d;
-    flex-shrink: 0;
-  }
-  .expand-toggle:not(:disabled):hover { background: #e8f1fb; border-color: #0d5ea6; color: #0d5ea6; }
-  .expand-toggle.open { background: #0d5ea6; border-color: #0d5ea6; color: white; }
+.logo-mark {
+  width: 36px; height: 36px;
+  background: var(--gold);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 18px; font-weight: 700;
+  color: var(--green);
+  flex-shrink: 0;
+}
 
-  .emp-name { font-weight: 700; color: #1a2332; }
-  .emp-fin  { font-family: 'Courier New', monospace; font-size: 11.5px; color: #6b7a8d; margin-top: 2px; }
-  .pass-num { font-family: 'Courier New', monospace; font-size: 12.5px; background: #f5f7fa; padding: 2px 7px; border-radius: 4px; color: #3a4a5c; }
+.logo-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 15px; font-weight: 600;
+  color: rgba(255,255,255,0.9);
+  line-height: 1.2;
+  letter-spacing: 0.3px;
+}
 
-  /* BADGES */
-  .badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 20px; font-size: 11.5px; font-weight: 600; white-space: nowrap; }
-  .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-  .badge-critical { background: #fdecea; color: #b71c1c; } .badge-critical::before { background: #e53935; }
-  .badge-urgent   { background: #fff3e0; color: #bf360c; } .badge-urgent::before   { background: #f57c00; }
-  .badge-warning  { background: #fffde7; color: #827717; } .badge-warning::before  { background: #f9a825; }
-  .badge-ok       { background: #e8f5e9; color: #1b5e20; } .badge-ok::before       { background: #43a047; }
-  .badge-ep   { background: #e8f1fb; color: #0d5ea6; font-size: 11px; padding: 2px 9px; }
-  .badge-ep::before { display: none; }
-  .badge-dp   { background: #f3e5f5; color: #6a1b9a; font-size: 11px; padding: 2px 9px; }
-  .badge-dp::before { display: none; }
-  .badge-ltvp { background: #e8f5e9; color: #1b5e20; font-size: 11px; padding: 2px 9px; }
-  .badge-ltvp::before { display: none; }
+.header-divider {
+  width: 1px;
+  height: 36px;
+  background: rgba(255,255,255,0.2);
+  margin: 0 4px;
+}
 
-  .days-critical { color: #e53935; font-weight: 700; font-size: 13px; }
-  .days-urgent   { color: #f57c00; font-weight: 700; font-size: 13px; }
-  .days-warning  { color: #c5a100; font-weight: 700; font-size: 13px; }
-  .days-ok       { color: #2e7d32; font-weight: 600; font-size: 13px; }
+.header-title-group { }
 
-  .dep-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 12px; font-size: 11.5px; font-weight: 600; background: #e8f1fb; color: #0d5ea6; cursor: pointer; transition: background 0.15s; }
-  .dep-chip:hover { background: #c5d9f0; }
+.header-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px; font-weight: 700;
+  color: var(--white);
+  letter-spacing: 0.2px;
+}
 
-  /* DP SECTION */
-  .dp-section { display: none; }
-  .dp-section.open { display: table-row-group; }
+.header-subtitle {
+  font-size: 12px;
+  color: var(--gold-light);
+  margin-top: 2px;
+  font-weight: 500;
+  letter-spacing: 0.4px;
+}
 
-  .dp-header td {
-    padding: 9px 14px; background: #eef4ff;
-    font-size: 11px; font-weight: 700; color: #0d5ea6;
-    text-transform: uppercase; letter-spacing: 0.6px;
-    border-bottom: 1px solid #dde8f5;
-  }
-  /* indent only the first visible column (2nd td — name), not every cell */
-  .dp-header td:first-child { padding-left: 54px; }
-  .dp-row td { padding: 10px 14px; background: #f8fbff; border-bottom: 1px solid #eef4ff; font-size: 13px; vertical-align: middle; }
-  .dp-row td:nth-child(2) { padding-left: 54px; }
-  .dp-row:hover td { background: #f0f6ff; }
-  .dp-row:last-child td { border-bottom: 1px solid #e8eef5; }
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  z-index: 1;
+}
 
-  .rel-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
-  .rel-Spouse  { background: #f3e5f5; color: #6a1b9a; }
-  .rel-Child   { background: #e3f2fd; color: #0d47a1; }
-  .rel-Dependant { background: #fce4ec; color: #880e4f; }
+.header-clock {
+  text-align: right;
+}
 
-  /* EMPTY */
-  .empty-state { text-align: center; padding: 56px 20px; color: #9aaab8; }
-  .empty-state .ei { font-size: 44px; margin-bottom: 14px; }
-  .empty-state p { font-size: 14px; }
+.clock-time {
+  font-size: 22px; font-weight: 700;
+  color: var(--white);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 1px;
+  line-height: 1;
+}
 
-  /* FOOTER */
-  .footer { text-align: center; padding: 14px; font-size: 11.5px; color: #9aaab8; }
+.clock-date {
+  font-size: 11.5px;
+  color: rgba(255,255,255,0.6);
+  margin-top: 3px;
+}
 
-  /* UPLOAD BAR */
-  .upload-bar {
-    margin: 20px 32px 0;
-    display: flex; align-items: center; gap: 16px;
-    background: white; border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-    padding: 14px 20px;
-  }
-  .upload-zone {
-    flex: 1; display: flex; align-items: center; gap: 12px;
-    border: 2px dashed #c8d6e8; border-radius: 9px;
-    padding: 12px 18px; cursor: pointer; transition: all 0.2s;
-    background: #f8fafc;
-  }
-  .upload-zone:hover, .upload-zone.dragover {
-    border-color: #0d5ea6; background: #e8f1fb;
-  }
-  .upload-zone input[type=file] { display: none; }
-  .upload-icon { font-size: 22px; }
-  .upload-text { font-size: 13px; color: #3a4a5c; }
-  .upload-text strong { display: block; font-size: 13.5px; color: #1a2332; }
-  .upload-text span   { font-size: 11.5px; color: #9aaab8; }
-  .upload-hint { font-size: 11.5px; color: #9aaab8; flex-shrink: 0; }
-  .file-loaded {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: #e8f5e9; color: #1b5e20; border-radius: 8px;
-    padding: 6px 14px; font-size: 12.5px; font-weight: 600;
-    flex-shrink: 0;
-  }
-  .file-loaded .clear-btn {
-    background: none; border: none; cursor: pointer; font-size: 14px;
-    color: #388e3c; line-height: 1; padding: 0 0 0 4px;
-  }
-  .file-loaded .clear-btn:hover { color: #b71c1c; }
+.header-mom-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 10px;
+  padding: 8px 14px;
+  text-align: center;
+}
 
-  /* TOAST */
-  .toast {
-    position: fixed; bottom: 28px; right: 28px; z-index: 999;
-    padding: 13px 22px; border-radius: 10px; font-size: 13.5px; font-weight: 500;
-    box-shadow: 0 6px 24px rgba(0,0,0,0.18);
-    display: flex; align-items: center; gap: 10px;
-    transform: translateY(80px); opacity: 0; transition: all 0.3s ease;
-  }
-  .toast.show { transform: translateY(0); opacity: 1; }
-  .toast-success { background: #1b5e20; color: white; }
-  .toast-error   { background: #b71c1c; color: white; }
+.mom-badge-label {
+  font-size: 9px;
+  color: var(--gold-light);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
 
-  /* ── TABLET (≤ 900px) ──────────────────────────────────────────────────── */
-  @media (max-width: 900px) {
-    .summary-bar { grid-template-columns: repeat(3, 1fr); }
-    .upload-hint { display: none; }
-    .legend { gap: 12px; }
-  }
+.mom-badge-value {
+  font-size: 13px; font-weight: 700;
+  color: var(--white);
+  margin-top: 2px;
+}
 
-  /* ── MOBILE (≤ 640px) ───────────────────────────────────────────────────── */
-  @media (max-width: 640px) {
-    /* global side margins */
-    .upload-bar, .summary-bar, .alert-banner,
-    .legend, .controls, .table-wrap { margin-left: 12px; margin-right: 12px; }
-    .summary-bar { padding-top: 14px; }
+/* ── UPLOAD BAR ──────────────────────────────────────────────────────────────── */
+.upload-section {
+  padding: 20px 40px 0;
+}
 
-    /* header */
-    .header { padding: 14px 16px; flex-wrap: wrap; gap: 8px; }
-    .header-logo { width: 40px; height: 40px; font-size: 20px; border-radius: 9px; }
-    .header h1 { font-size: 16px; }
-    .header .header-sub { font-size: 11px; }
-    /* clock moves below, compact */
-    .header-right { width: 100%; text-align: left; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 8px; display: flex; align-items: baseline; gap: 10px; }
-    .header-date { font-size: 11.5px; }
-    .header-time { font-size: 13px; margin-top: 0; }
-    .company-tag { display: none; }
+.upload-card {
+  background: var(--white);
+  border-radius: 14px;
+  border: 1px solid rgba(27,77,62,0.1);
+  padding: 16px 22px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  box-shadow: 0 2px 12px rgba(27,77,62,0.06);
+}
 
-    /* cards — 2-col grid, Total card spans full width */
-    .summary-bar { grid-template-columns: 1fr 1fr; gap: 10px; }
-    .card-total  { grid-column: span 2; }
-    .card { padding: 13px 14px; gap: 12px; }
-    .card-icon { width: 38px; height: 38px; font-size: 18px; border-radius: 9px; }
-    .card-val   { font-size: 24px; }
-    .card-label { font-size: 10px; letter-spacing: 0.3px; }
+.upload-zone {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 2px dashed rgba(27,77,62,0.2);
+  border-radius: 10px;
+  padding: 12px 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--cream);
+}
 
-    /* upload */
-    .upload-bar { flex-direction: column; align-items: stretch; gap: 10px; padding: 12px; margin-top: 14px; }
-    .upload-zone { padding: 10px 14px; }
-    .upload-text strong { font-size: 13px; }
-    .upload-text span { font-size: 11px; }
-    .file-loaded { justify-content: center; }
+.upload-zone:hover, .upload-zone.dragover {
+  border-color: var(--gold);
+  background: rgba(196,151,58,0.05);
+}
 
-    /* alert */
-    .alert-banner { margin-top: 12px; padding: 11px 14px; font-size: 12.5px; }
+.upload-zone input[type=file] { display: none; }
 
-    /* legend */
-    .legend { margin: 10px 12px 0; gap: 8px; }
-    .legend-item { font-size: 11px; }
+.upload-icon-wrap {
+  width: 42px; height: 42px;
+  background: rgba(27,77,62,0.08);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
 
-    /* filter controls */
-    .controls { margin-top: 12px; gap: 7px; }
-    .search-wrap { flex: none; width: 100%; min-width: unset; }
-    .filter-btn { padding: 7px 11px; font-size: 12px; }
+.upload-text strong {
+  display: block;
+  font-size: 13.5px; font-weight: 600;
+  color: var(--text-dark);
+}
 
-    /* table wrapper — horizontal scroll */
-    .table-wrap { margin: 10px 12px 24px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-    .table-header { flex-wrap: wrap; gap: 8px; padding: 12px 14px; }
-    .table-title { font-size: 14px; }
-    .table-sub   { font-size: 11px; }
-    .table-actions { width: 100%; }
-    .action-btn  { flex: 1; text-align: center; font-size: 12px; padding: 7px 10px; }
+.upload-text span {
+  font-size: 11.5px;
+  color: var(--gray-text);
+}
 
-    /* table cells — tighter padding */
-    thead th { padding: 9px 10px; font-size: 10px; }
-    tbody tr.ep-row td { padding: 10px 10px; font-size: 12.5px; }
-    .dp-row td  { padding: 8px 10px; font-size: 12px; }
-    .dp-row td:nth-child(2) { padding-left: 36px; }
-    .dp-header td:first-child { padding-left: 36px; }
+.upload-spec {
+  flex-shrink: 0;
+  background: var(--cream);
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 11px;
+  color: var(--gray-text);
+  line-height: 1.7;
+}
 
-    /* hide the standalone FIN column (col 3) — it's already shown
-       inside the name cell as .emp-fin, so no info is lost */
-    thead th:nth-child(3),
-    tbody tr.ep-row td:nth-child(3),
-    .dp-row td:nth-child(3) { display: none; }
+.upload-spec strong {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--green);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
 
-    /* shrink badges a touch */
-    .badge { font-size: 10.5px; padding: 2px 7px; }
-    .dep-chip { font-size: 10.5px; padding: 2px 7px; }
+.file-loaded {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--ok-bg);
+  color: var(--green);
+  border: 1px solid rgba(27,77,62,0.2);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 12.5px; font-weight: 600;
+  flex-shrink: 0;
+}
 
-    /* footer */
-    .footer { font-size: 10.5px; padding: 12px 16px; }
-  }
+.file-loaded .clear-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 14px; color: var(--green); line-height: 1; padding: 0 0 0 4px;
+}
+.file-loaded .clear-btn:hover { color: var(--critical); }
 
-  /* PRINT */
-  @media print {
-    .controls, .action-btn, .expand-toggle, .legend, .upload-bar { display: none; }
-    .dp-section { display: table-row-group !important; }
-    body { background: white; }
-    .table-wrap, .card { box-shadow: none; border: 1px solid #ddd; }
-    .summary-bar { grid-template-columns: repeat(5,1fr); }
-    .header { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-  }
+/* ── METRICS STRIP ───────────────────────────────────────────────────────────── */
+.metrics-section {
+  padding: 20px 40px 0;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr 1fr 1fr;
+  gap: 14px;
+}
+
+.metric-card {
+  background: var(--white);
+  border-radius: 14px;
+  padding: 20px 22px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(27,77,62,0.06);
+  border: 1px solid transparent;
+}
+
+.metric-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(27,77,62,0.12);
+}
+
+.metric-card.active-filter {
+  border-color: var(--gold);
+  box-shadow: 0 4px 20px rgba(196,151,58,0.2);
+}
+
+.metric-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  border-radius: 14px 14px 0 0;
+}
+
+.metric-total::before    { background: var(--green); }
+.metric-critical::before { background: var(--critical); }
+.metric-urgent::before   { background: var(--urgent); }
+.metric-warning::before  { background: var(--warning); }
+.metric-ok::before       { background: var(--ok); }
+
+.metric-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.metric-icon {
+  width: 44px; height: 44px;
+  border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.metric-total    .metric-icon { background: rgba(27,77,62,0.1); }
+.metric-critical .metric-icon { background: var(--critical-bg); }
+.metric-urgent   .metric-icon { background: var(--urgent-bg); }
+.metric-warning  .metric-icon { background: var(--warning-bg); }
+.metric-ok       .metric-icon { background: var(--ok-bg); }
+
+.metric-trend {
+  font-size: 11px; font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 20px;
+}
+
+.metric-val {
+  font-size: 36px; font-weight: 700;
+  line-height: 1;
+  color: var(--text-dark);
+}
+
+.metric-total .metric-val { color: var(--green); }
+.metric-critical .metric-val { color: var(--critical); }
+.metric-urgent   .metric-val { color: var(--urgent); }
+.metric-warning  .metric-val { color: var(--warning); }
+.metric-ok       .metric-val { color: var(--ok); }
+
+.metric-label {
+  font-size: 11.5px; font-weight: 600;
+  color: var(--gray-text);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 6px;
+}
+
+.metric-sub {
+  font-size: 11px;
+  color: rgba(107,123,116,0.7);
+  margin-top: 2px;
+}
+
+/* Progress bar inside card */
+.metric-bar {
+  margin-top: 14px;
+  height: 4px;
+  background: var(--gray-light);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.metric-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.6s ease;
+}
+
+.metric-total    .metric-bar-fill { background: var(--green); }
+.metric-critical .metric-bar-fill { background: var(--critical); }
+.metric-urgent   .metric-bar-fill { background: var(--urgent); }
+.metric-warning  .metric-bar-fill { background: var(--warning); }
+.metric-ok       .metric-bar-fill { background: var(--ok); }
+
+/* ── TIMELINE MINIMAP ──────────────────────────────────────────────────────── */
+.timeline-section {
+  padding: 20px 40px 0;
+}
+
+.timeline-card {
+  background: var(--white);
+  border-radius: 14px;
+  padding: 20px 24px;
+  box-shadow: 0 2px 10px rgba(27,77,62,0.06);
+  border: 1px solid rgba(27,77,62,0.08);
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 17px; font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 16px;
+}
+
+.timeline-grid {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.timeline-person {
+  flex: 1;
+  background: var(--cream);
+  border-radius: 10px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.18s;
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.timeline-person:hover {
+  border-color: var(--gold);
+  background: rgba(196,151,58,0.05);
+}
+
+.timeline-person-name {
+  font-size: 11px; font-weight: 700;
+  color: var(--text-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 8px;
+}
+
+.timeline-bar-track {
+  height: 8px;
+  background: var(--gray-light);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.timeline-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.6s ease;
+}
+
+.timeline-expiry {
+  font-size: 10px;
+  color: var(--gray-text);
+  font-weight: 500;
+}
+
+.timeline-days-chip {
+  display: inline-block;
+  font-size: 10px; font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  margin-top: 4px;
+}
+
+/* ── ALERT BANNER ────────────────────────────────────────────────────────────── */
+.alert-section {
+  padding: 16px 40px 0;
+}
+
+.alert-card {
+  border-radius: 12px;
+  padding: 14px 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  border: 1px solid;
+}
+
+.alert-card.alert-critical {
+  background: var(--critical-bg);
+  border-color: rgba(192,57,43,0.25);
+  color: #7f1d1d;
+}
+
+.alert-card.alert-warning {
+  background: var(--warning-bg);
+  border-color: rgba(183,134,11,0.25);
+  color: #78350f;
+}
+
+.alert-card.alert-ok {
+  background: var(--ok-bg);
+  border-color: rgba(27,77,62,0.2);
+  color: var(--green);
+}
+
+.alert-icon-wrap {
+  width: 36px; height: 36px;
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px;
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.6);
+}
+
+.alert-body strong {
+  display: block;
+  font-size: 13.5px; font-weight: 700;
+  margin-bottom: 3px;
+}
+
+.alert-body p {
+  font-size: 12.5px;
+  opacity: 0.85;
+  line-height: 1.5;
+}
+
+/* ── TABLE SECTION ───────────────────────────────────────────────────────────── */
+.table-section {
+  padding: 20px 40px 40px;
+}
+
+.table-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 260px;
+}
+
+.search-wrap input {
+  width: 100%;
+  padding: 10px 16px 10px 42px;
+  border: 1px solid rgba(27,77,62,0.15);
+  border-radius: 10px;
+  font-size: 13.5px;
+  background: var(--white);
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text-dark);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-wrap input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(196,151,58,0.15);
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px;
+  color: var(--gray-text);
+}
+
+.filter-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pill {
+  padding: 8px 16px;
+  border-radius: 30px;
+  border: 1.5px solid rgba(27,77,62,0.15);
+  background: var(--white);
+  cursor: pointer;
+  font-size: 12.5px; font-weight: 600;
+  color: var(--gray-text);
+  font-family: 'DM Sans', sans-serif;
+  transition: all 0.15s;
+  white-space: nowrap;
+  display: flex; align-items: center; gap: 5px;
+}
+
+.pill:hover { border-color: var(--gold); color: var(--green); }
+.pill.pill-active-all      { background: var(--green); color: white; border-color: var(--green); }
+.pill.pill-active-critical { background: var(--critical); color: white; border-color: var(--critical); }
+.pill.pill-active-urgent   { background: var(--urgent); color: white; border-color: var(--urgent); }
+.pill.pill-active-warning  { background: var(--warning); color: white; border-color: var(--warning); }
+.pill.pill-active-ok       { background: var(--ok); color: white; border-color: var(--ok); }
+
+.pill-count {
+  background: rgba(255,255,255,0.25);
+  border-radius: 10px;
+  padding: 1px 6px;
+  font-size: 11px;
+}
+
+.pill:not(.pill-active-all):not(.pill-active-critical):not(.pill-active-urgent):not(.pill-active-warning):not(.pill-active-ok) .pill-count {
+  background: rgba(27,77,62,0.1);
+  color: var(--green);
+}
+
+/* Table card */
+.table-card {
+  background: var(--white);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(27,77,62,0.07);
+  border: 1px solid rgba(27,77,62,0.08);
+}
+
+.table-card-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--gray-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.table-card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 17px; font-weight: 600;
+  color: var(--text-dark);
+}
+
+.table-card-sub {
+  font-size: 12px;
+  color: var(--gray-text);
+  margin-top: 3px;
+}
+
+.table-action-btns {
+  display: flex;
+  gap: 8px;
+}
+
+.tbl-btn {
+  padding: 7px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(27,77,62,0.15);
+  background: var(--cream);
+  font-size: 12px; font-weight: 600;
+  color: var(--green);
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: all 0.15s;
+}
+
+.tbl-btn:hover {
+  background: var(--green);
+  color: white;
+  border-color: var(--green);
+}
+
+/* Table itself */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead th {
+  background: #F4F6F4;
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 10.5px; font-weight: 700;
+  color: var(--gray-text);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  border-bottom: 2px solid var(--gray-light);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+
+thead th:hover { color: var(--green); }
+thead th.sorted { color: var(--gold); }
+
+.sort-arrow { display: inline-block; margin-left: 4px; opacity: 0.4; }
+thead th.sorted .sort-arrow { opacity: 1; }
+
+tbody tr.ep-row {
+  cursor: pointer;
+  transition: background 0.12s;
+  border-bottom: 1px solid var(--gray-light);
+}
+
+tbody tr.ep-row:hover { background: #F9FBF9; }
+tbody tr.ep-row.expanded { background: #F2F8F5; }
+
+tbody tr.ep-row td {
+  padding: 14px 16px;
+  font-size: 13.5px;
+  vertical-align: middle;
+}
+
+/* Left urgency stripe */
+tbody tr.ep-row td:first-child {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.urgency-stripe {
+  width: 5px;
+  height: 38px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.stripe-critical { background: var(--critical); }
+.stripe-urgent   { background: var(--urgent); }
+.stripe-warning  { background: var(--warning); }
+.stripe-ok       { background: var(--ok); }
+
+.expand-toggle {
+  width: 28px; height: 28px;
+  border-radius: 7px;
+  border: 1.5px solid rgba(27,77,62,0.2);
+  background: var(--cream);
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  transition: all 0.18s;
+  color: var(--green);
+  flex-shrink: 0;
+}
+
+.expand-toggle:not(:disabled):hover {
+  background: var(--green);
+  border-color: var(--green);
+  color: white;
+}
+
+.expand-toggle.open {
+  background: var(--green);
+  border-color: var(--green);
+  color: white;
+}
+
+.emp-name {
+  font-weight: 700;
+  color: var(--text-dark);
+  font-size: 13.5px;
+}
+
+.emp-fin {
+  font-family: 'DM Mono', 'Courier New', monospace;
+  font-size: 11px;
+  color: var(--gray-text);
+  margin-top: 2px;
+  letter-spacing: 0.3px;
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11.5px; font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge::before {
+  content: '';
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.badge-critical { background: var(--critical-bg); color: var(--critical); }
+.badge-critical::before { background: var(--critical); }
+.badge-urgent   { background: var(--urgent-bg);   color: var(--urgent); }
+.badge-urgent::before   { background: var(--urgent); }
+.badge-warning  { background: var(--warning-bg);  color: var(--warning); }
+.badge-warning::before  { background: var(--warning); }
+.badge-ok       { background: var(--ok-bg);       color: var(--ok); }
+.badge-ok::before       { background: var(--ok); }
+
+.pass-badge {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 6px;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.pass-ep   { background: rgba(27,77,62,0.1); color: var(--green); }
+.pass-dp   { background: rgba(196,151,58,0.12); color: #7A5C10; }
+.pass-ltvp { background: rgba(61,139,114,0.12); color: var(--green-mid); }
+
+.days-critical { color: var(--critical); font-weight: 700; }
+.days-urgent   { color: var(--urgent);   font-weight: 700; }
+.days-warning  { color: var(--warning);  font-weight: 700; }
+.days-ok       { color: var(--ok);       font-weight: 600; }
+
+/* Days left pill */
+.days-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px; font-weight: 700;
+}
+
+.days-pill-critical { background: var(--critical-bg); color: var(--critical); }
+.days-pill-urgent   { background: var(--urgent-bg);   color: var(--urgent); }
+.days-pill-warning  { background: var(--warning-bg);  color: var(--warning); }
+.days-pill-ok       { background: var(--ok-bg);       color: var(--ok); }
+
+.dep-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-size: 11.5px; font-weight: 600;
+  background: rgba(196,151,58,0.1);
+  color: var(--gold);
+  cursor: pointer;
+  transition: background 0.15s;
+  border: 1px solid rgba(196,151,58,0.2);
+}
+
+.dep-chip:hover { background: rgba(196,151,58,0.2); }
+
+/* DP SECTION */
+.dp-section { display: none; }
+.dp-section.open { display: table-row-group; }
+
+.dp-subheader td {
+  padding: 9px 16px 9px 60px;
+  background: #F0F7F4;
+  font-size: 10.5px; font-weight: 700;
+  color: var(--green-mid);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  border-bottom: 1px solid rgba(27,77,62,0.1);
+}
+
+.dp-row { background: #FAFCFB; }
+.dp-row td {
+  padding: 11px 16px;
+  border-bottom: 1px solid rgba(27,77,62,0.06);
+  font-size: 13px;
+  vertical-align: middle;
+}
+
+.dp-row td:nth-child(3) { padding-left: 60px; }
+.dp-row:hover td { background: #F2F8F5; }
+
+.rel-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-size: 10.5px; font-weight: 600;
+  margin-top: 3px;
+}
+
+.rel-Spouse    { background: rgba(196,151,58,0.12); color: #7A5C10; }
+.rel-Child     { background: rgba(42,107,87,0.1);   color: var(--green-mid); }
+.rel-Dependant { background: rgba(232,71,42,0.08);  color: #8B2F1A; }
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--gray-text);
+}
+
+.empty-icon { font-size: 48px; margin-bottom: 14px; }
+.empty-text { font-size: 14.5px; color: var(--gray-text); }
+
+/* ── LEGEND ─────────────────────────────────────────────────────────────────── */
+.legend-strip {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 12px 40px 0;
+}
+
+.legend-item {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11.5px; color: var(--gray-text);
+}
+
+.legend-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+}
+
+/* ── FOOTER ──────────────────────────────────────────────────────────────────── */
+.footer {
+  text-align: center;
+  padding: 16px;
+  font-size: 11.5px;
+  color: var(--gray-text);
+  border-top: 1px solid var(--gray-light);
+  background: var(--white);
+  margin-top: 8px;
+}
+
+/* ── TOAST ───────────────────────────────────────────────────────────────────── */
+.toast {
+  position: fixed; bottom: 28px; right: 28px; z-index: 999;
+  padding: 13px 22px;
+  border-radius: 10px; font-size: 13.5px; font-weight: 500;
+  box-shadow: 0 6px 28px rgba(0,0,0,0.2);
+  display: flex; align-items: center; gap: 10px;
+  transform: translateY(80px); opacity: 0;
+  transition: all 0.3s ease;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast-success { background: var(--green); color: white; }
+.toast-error   { background: var(--critical); color: white; }
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.refresh-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 8px;
+  color: white;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.refresh-btn:hover {
+  background: rgba(255,255,255,0.18);
+  border-color: var(--gold);
+}
+
+.refresh-btn.spinning #refresh-icon {
+  display: inline-block;
+  animation: spin 0.8s linear infinite;
+}
+
+/* ── RESPONSIVE ──────────────────────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .metrics-section { grid-template-columns: repeat(3, 1fr); }
+  .metric-total { grid-column: span 3; }
+  .timeline-section { display: none; }
+}
+
+@media (max-width: 768px) {
+  .header { padding: 0 20px; }
+  .upload-section,
+  .metrics-section,
+  .alert-section,
+  .legend-strip,
+  .table-section { padding-left: 16px; padding-right: 16px; }
+  .metrics-section { grid-template-columns: 1fr 1fr; }
+  .metric-total { grid-column: span 2; }
+  .upload-spec { display: none; }
+  .header-mom-badge { display: none; }
+}
+
+@media (max-width: 640px) {
+  .metrics-section { grid-template-columns: 1fr 1fr; }
+  thead th:nth-child(3),
+  tbody tr.ep-row td:nth-child(3),
+  .dp-row td:nth-child(3) { display: none; }
+}
+
+@media print {
+  .table-controls, .tbl-btn, .expand-toggle, .legend-strip,
+  .upload-section, .timeline-section { display: none !important; }
+  .dp-section { display: table-row-group !important; }
+  body { background: white; }
+  .table-card, .metric-card { box-shadow: none; border: 1px solid #ddd; }
+  .metrics-section { grid-template-columns: repeat(5, 1fr); }
+  .header { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
-<div class="header">
+<!-- ── HEADER ─────────────────────────────────────────────────────────────── -->
+<header class="header">
+  <div class="header-accent-bar"></div>
   <div class="header-left">
-    <div class="header-logo">🛂</div>
-    <div>
-      <h1>EP &amp; DP Expiry Tracker</h1>
-      <div class="header-sub">Singapore Ministry of Manpower · Pass Renewal Dashboard</div>
+    <div class="intellect-logo">
+      <div class="logo-mark">I</div>
+      <div class="logo-text">Intellect<br>Design Arena</div>
+    </div>
+    <div class="header-divider"></div>
+    <div class="header-title-group">
+      <div class="header-title">EP & DP Expiry Dashboard</div>
+      <div class="header-subtitle">Singapore Ministry of Manpower · Pass Renewal Tracker</div>
     </div>
   </div>
   <div class="header-right">
-    <div class="header-date" id="live-date"></div>
-    <div class="header-time" id="live-time"></div>
-    <div class="company-tag">Intellect Design Arena Pte. Ltd.</div>
-  </div>
-</div>
-
-<!-- CSV UPLOAD BAR -->
-<div class="upload-bar">
-  <div class="upload-zone" id="upload-zone"
-       onclick="document.getElementById('csv-input').click()"
-       ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
-    <input type="file" id="csv-input" accept=".csv,text/csv" onchange="handleFileInput(event)">
-    <div class="upload-icon">📂</div>
-    <div class="upload-text">
-      <strong>Upload MOM Passes CSV</strong>
-      <span>Click to browse or drag &amp; drop · Same format as MOM existing passes export</span>
+    <div class="header-mom-badge">
+      <div class="mom-badge-label">Last Refreshed</div>
+      <div class="mom-badge-value" id="last-fetched" style="font-size:11px;letter-spacing:0;">Loading…</div>
+    </div>
+    <button class="refresh-btn" onclick="fetchCSVFromGitHub()" title="Reload latest CSV from GitHub">
+      <span id="refresh-icon">↻</span> Refresh
+    </button>
+    <div class="header-clock">
+      <div class="clock-time" id="live-time"></div>
+      <div class="clock-date" id="live-date"></div>
     </div>
   </div>
-  <div id="file-loaded-tag" style="display:none;" class="file-loaded">
-    <span>✅</span>
-    <span id="file-name-label"></span>
-    <button class="clear-btn" onclick="clearUpload()" title="Reset to built-in data">✕</button>
-  </div>
-  <div class="upload-hint" id="upload-hint">
-    Expected columns: Name, FIN, Date of issuance,<br>Date of expiry, Pass type, Submitted by, Status
+</header>
+
+<!-- ── UPLOAD ─────────────────────────────────────────────────────────────── -->
+<div class="upload-section">
+  <div class="upload-card">
+    <div class="upload-zone" id="upload-zone"
+         onclick="document.getElementById('csv-input').click()"
+         ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+      <input type="file" id="csv-input" accept=".csv,text/csv" onchange="handleFileInput(event)">
+      <div class="upload-icon-wrap">📂</div>
+      <div class="upload-text">
+        <strong>Manual Override — Upload CSV</strong>
+        <span>Auto-loads from GitHub on page open · Use this to preview a new export before pushing</span>
+      </div>
+    </div>
+    <div id="file-loaded-tag" style="display:none;" class="file-loaded">
+      <span>✅</span>
+      <span id="file-name-label"></span>
+      <button class="clear-btn" onclick="clearUpload()" title="Reset to built-in data">✕</button>
+    </div>
+    <div class="upload-spec" id="upload-hint">
+      <strong>Expected Columns</strong>
+      Name · FIN · Date of issuance<br>
+      Date of expiry · Pass type<br>
+      Submitted by · Status
+    </div>
   </div>
 </div>
 
-<!-- SUMMARY CARDS -->
-<div class="summary-bar">
-  <div class="card card-total"    onclick="setFilter('all')">
-    <div class="card-icon">👤</div>
-    <div><div class="card-val" id="c-total">—</div><div class="card-label">Total EP Holders</div></div>
+<!-- ── METRICS ─────────────────────────────────────────────────────────────── -->
+<div class="metrics-section" id="metrics-section">
+  <div class="metric-card metric-total" onclick="setFilter('all')" id="mc-total">
+    <div class="metric-header">
+      <div class="metric-icon">👥</div>
+      <span class="metric-trend" style="background:rgba(27,77,62,0.1);color:var(--green);">Singapore</span>
+    </div>
+    <div class="metric-val" id="c-total">—</div>
+    <div class="metric-label">Total EP Holders</div>
+    <div class="metric-sub">Intellect Design Arena Pte. Ltd.</div>
+    <div class="metric-bar"><div class="metric-bar-fill" id="bar-total" style="width:100%;"></div></div>
   </div>
-  <div class="card card-critical" onclick="setFilter('critical')">
-    <div class="card-icon">🔴</div>
-    <div><div class="card-val" id="c-critical">—</div><div class="card-label">Critical &lt;30 days</div></div>
+  <div class="metric-card metric-critical" onclick="setFilter('critical')" id="mc-critical">
+    <div class="metric-header">
+      <div class="metric-icon">🔴</div>
+    </div>
+    <div class="metric-val" id="c-critical">—</div>
+    <div class="metric-label">Critical</div>
+    <div class="metric-sub">Expiring &lt;30 days</div>
+    <div class="metric-bar"><div class="metric-bar-fill" id="bar-critical" style="width:0%;"></div></div>
   </div>
-  <div class="card card-urgent"   onclick="setFilter('urgent')">
-    <div class="card-icon">🟠</div>
-    <div><div class="card-val" id="c-urgent">—</div><div class="card-label">Urgent 30–60 days</div></div>
+  <div class="metric-card metric-urgent" onclick="setFilter('urgent')" id="mc-urgent">
+    <div class="metric-header">
+      <div class="metric-icon">🟠</div>
+    </div>
+    <div class="metric-val" id="c-urgent">—</div>
+    <div class="metric-label">Urgent</div>
+    <div class="metric-sub">30 – 60 days</div>
+    <div class="metric-bar"><div class="metric-bar-fill" id="bar-urgent" style="width:0%;"></div></div>
   </div>
-  <div class="card card-warning"  onclick="setFilter('warning')">
-    <div class="card-icon">🟡</div>
-    <div><div class="card-val" id="c-warning">—</div><div class="card-label">Due Soon 61–90 days</div></div>
+  <div class="metric-card metric-warning" onclick="setFilter('warning')" id="mc-warning">
+    <div class="metric-header">
+      <div class="metric-icon">🟡</div>
+    </div>
+    <div class="metric-val" id="c-warning">—</div>
+    <div class="metric-label">Due Soon</div>
+    <div class="metric-sub">61 – 90 days</div>
+    <div class="metric-bar"><div class="metric-bar-fill" id="bar-warning" style="width:0%;"></div></div>
   </div>
-  <div class="card card-ok"       onclick="setFilter('ok')">
-    <div class="card-icon">🟢</div>
-    <div><div class="card-val" id="c-ok">—</div><div class="card-label">Valid &gt;90 days</div></div>
+  <div class="metric-card metric-ok" onclick="setFilter('ok')" id="mc-ok">
+    <div class="metric-header">
+      <div class="metric-icon">🟢</div>
+    </div>
+    <div class="metric-val" id="c-ok">—</div>
+    <div class="metric-label">Valid</div>
+    <div class="metric-sub">More than 90 days</div>
+    <div class="metric-bar"><div class="metric-bar-fill" id="bar-ok" style="width:0%;"></div></div>
   </div>
 </div>
 
-<!-- ALERT BANNER -->
-<div id="alert-banner" class="alert-banner" style="display:none;">
-  <div class="alert-icon" id="alert-icon"></div>
-  <div class="alert-body" id="alert-body"></div>
-</div>
-
-<!-- LEGEND -->
-<div class="legend">
-  <div class="legend-item"><div class="legend-dot" style="background:#e53935;"></div> &lt;30 days — Critical, initiate renewal immediately</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#f57c00;"></div> 30–60 days — Urgent, start MOM application</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#f9a825;"></div> 61–90 days — Due soon, prepare documents</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#43a047;"></div> &gt;90 days — Valid, no action needed</div>
-</div>
-
-<!-- CONTROLS -->
-<div class="controls">
-  <div class="search-wrap">
-    <span class="search-icon">🔍</span>
-    <input type="text" id="search-input" placeholder="Search name, FIN, pass type…" oninput="renderTable()">
+<!-- ── TIMELINE MINIMAP ────────────────────────────────────────────────────── -->
+<div class="timeline-section">
+  <div class="timeline-card">
+    <div class="section-label">Renewal Timeline</div>
+    <div class="section-title">Pass Expiry Outlook</div>
+    <div class="timeline-grid" id="timeline-grid"></div>
   </div>
-  <button class="filter-btn active" id="btn-all"      onclick="setFilter('all')">All</button>
-  <button class="filter-btn"        id="btn-critical" onclick="setFilter('critical')">🔴 Critical</button>
-  <button class="filter-btn"        id="btn-urgent"   onclick="setFilter('urgent')">🟠 Urgent</button>
-  <button class="filter-btn"        id="btn-warning"  onclick="setFilter('warning')">🟡 Due Soon</button>
-  <button class="filter-btn"        id="btn-ok"       onclick="setFilter('ok')">🟢 Valid</button>
 </div>
 
-<!-- TABLE -->
-<div class="table-wrap">
-  <div class="table-header">
+<!-- ── ALERT ───────────────────────────────────────────────────────────────── -->
+<div class="alert-section">
+  <div id="alert-banner" class="alert-card" style="display:none;">
+    <div class="alert-icon-wrap" id="alert-icon-wrap"><span id="alert-icon"></span></div>
+    <div class="alert-body" id="alert-body"></div>
+  </div>
+</div>
+
+<!-- ── LEGEND ─────────────────────────────────────────────────────────────── -->
+<div class="legend-strip">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--critical);"></div> &lt;30 days — Critical, initiate renewal immediately</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--urgent);"></div> 30–60 days — Urgent, submit MOM application</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--warning);"></div> 61–90 days — Due soon, prepare documents</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--ok);"></div> &gt;90 days — Valid, no action needed</div>
+</div>
+
+<!-- ── TABLE ──────────────────────────────────────────────────────────────── -->
+<div class="table-section">
+  <div class="table-controls">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input" placeholder="Search by name, FIN, pass type…" oninput="renderTable()">
+    </div>
+    <div class="filter-pills">
+      <button class="pill pill-active-all" id="btn-all"      onclick="setFilter('all')">All <span class="pill-count" id="pc-all">0</span></button>
+      <button class="pill" id="btn-critical" onclick="setFilter('critical')">🔴 Critical <span class="pill-count" id="pc-critical">0</span></button>
+      <button class="pill" id="btn-urgent"   onclick="setFilter('urgent')">🟠 Urgent <span class="pill-count" id="pc-urgent">0</span></button>
+      <button class="pill" id="btn-warning"  onclick="setFilter('warning')">🟡 Due Soon <span class="pill-count" id="pc-warning">0</span></button>
+      <button class="pill" id="btn-ok"       onclick="setFilter('ok')">🟢 Valid <span class="pill-count" id="pc-ok">0</span></button>
+    </div>
+  </div>
+
+  <!-- Loading state -->
+  <div id="loading-state" style="display:none; text-align:center; padding:60px 20px; color:var(--gray-text);">
+    <div style="font-size:36px; margin-bottom:14px; animation:spin 1s linear infinite; display:inline-block;">⟳</div>
+    <div style="font-size:14px; font-weight:600; color:var(--green);">Loading pass data…</div>
+    <div style="font-size:12px; margin-top:6px;">Fetching <code style="background:var(--gray-light);padding:2px 6px;border-radius:4px;">199701040R-00-000_Existing_Passes.csv</code> from GitHub</div>
+  </div>
+
+  <!-- Fetch error state -->
+  <div id="fetch-error" style="display:none; background:#FEF0EF; border:1px solid rgba(192,57,43,0.2); border-radius:12px; padding:20px 24px; margin-bottom:16px; align-items:flex-start; gap:14px;">
+    <div style="font-size:24px; flex-shrink:0;">⚠️</div>
     <div>
-      <div class="table-title">Employment Pass Holders</div>
-      <div class="table-sub">Click any row to expand Dependent Pass holders · Renewals flagged 90 days before expiry</div>
-    </div>
-    <div class="table-actions">
-      <button class="action-btn" onclick="toggleAll()" id="expand-btn">▶ Expand All</button>
-      <button class="action-btn" onclick="sortBy('days')">Sort by Urgency</button>
+      <div style="font-weight:700; color:var(--critical); font-size:14px; margin-bottom:6px;">Could not load CSV data</div>
+      <div id="fetch-error-msg" style="font-size:13px; color:#7f1d1d; margin-bottom:12px;"></div>
+      <div style="font-size:12.5px; color:var(--gray-text); line-height:1.7;">
+        Make sure <strong>199701040R-00-000_Existing_Passes.csv</strong> is uploaded to the root of your
+        <strong>nagarajprasadh/mom</strong> repo on the <strong>main</strong> branch.<br>
+        Then click <button onclick="fetchCSVFromGitHub()" style="background:var(--green);color:white;border:none;border-radius:6px;padding:4px 12px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;">↻ Try Again</button>
+      </div>
     </div>
   </div>
-  <table>
-    <thead>
-      <tr>
-        <th style="width:36px; padding-left:16px;"></th>
-        <th onclick="sortBy('name')">Employee Name <span class="sort-arrow" id="sa-name">↕</span></th>
-        <th onclick="sortBy('fin')">FIN <span class="sort-arrow" id="sa-fin">↕</span></th>
-        <th onclick="sortBy('passType')">Pass Type <span class="sort-arrow" id="sa-passType">↕</span></th>
-        <th onclick="sortBy('issued')">Issued <span class="sort-arrow" id="sa-issued">↕</span></th>
-        <th onclick="sortBy('expiry')">Expiry Date <span class="sort-arrow" id="sa-expiry">↕</span></th>
-        <th onclick="sortBy('days')">Days Left <span class="sort-arrow" id="sa-days">↑</span></th>
-        <th>Status</th>
-        <th>Dependants</th>
-      </tr>
-    </thead>
-    <tbody id="ep-tbody"></tbody>
-  </table>
-  <div class="empty-state" id="empty-state" style="display:none;">
-    <div class="ei">🔍</div>
-    <p>No records match your search or filter.</p>
+
+  <div class="table-card">
+    <div class="table-card-header">
+      <div>
+        <div class="table-card-title">Employment Pass Holders</div>
+        <div class="table-card-sub">Click any row to expand Dependent Pass holders · Renewals flagged 90 days prior</div>
+      </div>
+      <div class="table-action-btns">
+        <button class="tbl-btn" onclick="toggleAll()" id="expand-btn">▶ Expand All</button>
+        <button class="tbl-btn" onclick="sortBy('days')">Sort by Urgency</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:20px;"></th>
+            <th style="width:36px;"></th>
+            <th onclick="sortBy('name')">Employee Name <span class="sort-arrow" id="sa-name">↕</span></th>
+            <th onclick="sortBy('fin')">FIN <span class="sort-arrow" id="sa-fin">↕</span></th>
+            <th onclick="sortBy('passType')">Pass Type <span class="sort-arrow" id="sa-passType">↕</span></th>
+            <th onclick="sortBy('issued')">Issued <span class="sort-arrow" id="sa-issued">↕</span></th>
+            <th onclick="sortBy('expiry')">Expiry Date <span class="sort-arrow" id="sa-expiry">↕</span></th>
+            <th onclick="sortBy('days')">Days Left <span class="sort-arrow" id="sa-days">↑</span></th>
+            <th>Status</th>
+            <th>Dependants</th>
+          </tr>
+        </thead>
+        <tbody id="ep-tbody"></tbody>
+      </table>
+    </div>
+    <div class="empty-state" id="empty-state" style="display:none;">
+      <div class="empty-icon">🔍</div>
+      <div class="empty-text">No records match your search or filter.</div>
+    </div>
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<div class="footer">
+<footer class="footer">
   Data sourced from MOM Existing Passes export · As of <span id="footer-date"></span> ·
   EP renewals must be submitted to MOM at least 6 weeks before expiry · For internal HR use only
-</div>
+</footer>
 
+<!-- ── JAVASCRIPT ─────────────────────────────────────────────────────────── -->
 <script>
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 const TODAY = (() => { const d = new Date(); d.setHours(0,0,0,0); return d; })();
@@ -459,15 +1232,12 @@ const TODAY = (() => { const d = new Date(); d.setHours(0,0,0,0); return d; })()
 function parseMOMDate(str) {
   if (!str || !str.trim()) return null;
   str = str.trim();
-  // "21 DEC 2027" — MOM export format
   const months = {JAN:0,FEB:1,MAR:2,APR:3,MAY:4,JUN:5,JUL:6,AUG:7,SEP:8,OCT:9,NOV:10,DEC:11};
   const momMatch = str.toUpperCase().match(/^(\d{1,2})\s+([A-Z]{3})\s+(\d{4})$/);
   if (momMatch) {
     const [, d, m, y] = momMatch;
     if (months[m] !== undefined) return new Date(+y, months[m], +d);
   }
-  // Fallback: try native Date parse (handles DD/MM/YYYY, YYYY-MM-DD, etc.)
-  // Try DD/MM/YYYY or DD-MM-YYYY
   const dmyMatch = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
   if (dmyMatch) {
     const [, d, mo, y] = dmyMatch;
@@ -489,154 +1259,135 @@ function fmtDate(dateObj) {
 }
 
 function statusOf(days) {
-  if (days < 0)  return 'critical';
-  if (days <= 30) return 'critical';
-  if (days <= 60) return 'urgent';
-  if (days <= 90) return 'warning';
+  if (days < 0)   return 'critical';
+  if (days <= 30)  return 'critical';
+  if (days <= 60)  return 'urgent';
+  if (days <= 90)  return 'warning';
   return 'ok';
 }
 
 function badgeHtml(days) {
   const st = statusOf(days);
-  const label = days < 0 ? 'Expired' : { critical:'Expiring Soon', urgent:'Renew Urgently', warning:'Due in 90 Days', ok:'Valid' }[st];
+  const label = days < 0 ? 'Expired' : {critical:'Expiring Soon',urgent:'Renew Now',warning:'Due in 90d',ok:'Valid'}[st];
   return `<span class="badge badge-${st}">${label}</span>`;
 }
 
 function daysHtml(days) {
-  if (days < 0) return `<span class="days-critical">⚠ ${Math.abs(days)}d overdue</span>`;
+  if (days < 0) return `<span class="days-pill days-pill-critical">⚠ ${Math.abs(days)}d overdue</span>`;
   const cl = statusOf(days);
-  return `<span class="days-${cl}">${days} days</span>`;
+  return `<span class="days-pill days-pill-${cl}">${days}d</span>`;
 }
 
 function passTypeBadge(pt) {
-  if (pt === 'Employment Pass') return `<span class="badge badge-ep">EP</span>`;
-  if (pt === "Dependant's Pass") return `<span class="badge badge-dp">DP</span>`;
-  if (pt === 'Long-Term Visit Pass') return `<span class="badge badge-ltvp">LTVP</span>`;
-  return `<span class="badge badge-ep">${pt}</span>`;
+  if (pt === 'Employment Pass')       return `<span class="pass-badge pass-ep">EP</span>`;
+  if (pt === "Dependant's Pass")      return `<span class="pass-badge pass-dp">DP</span>`;
+  if (pt === 'Long-Term Visit Pass')  return `<span class="pass-badge pass-ltvp">LTVP</span>`;
+  return `<span class="pass-badge pass-ep">${pt}</span>`;
 }
 
-// ─── REAL DATA (from MOM CSV: 199701040R-00-000_Existing_Passes.csv) ──────────
-// EP holders, each with their dependants inferred from family name + pass issuance groupings
-const EP_DATA = [
-  {
-    id: 1,
-    name: 'KANDASAMY SENTHIL KUMAR',
-    fin: 'G3372291K',
-    passType: 'Employment Pass',
-    issued: parseMOMDate('03 APR 2023'),
-    expiry: parseMOMDate('02 MAY 2026'),
-    submittedBy: 'NERELLA SUBHASH CHANDRA',
-    status: 'Issued',
-    dependants: [
-      { name: 'SENTHIL KUMAR ABIRAMI',              fin: 'G3468282N', passType: "Dependant's Pass", issued: parseMOMDate('19 APR 2023'), expiry: parseMOMDate('02 MAY 2026'), relation: 'Spouse' },
-      { name: 'KANDASAMY SENTHIL KUMAR NIWIN VARSHAN', fin: 'G3466720P', passType: "Dependant's Pass", issued: parseMOMDate('19 APR 2023'), expiry: parseMOMDate('02 MAY 2026'), relation: 'Child' },
-      { name: 'SENTHIL KUMAR NIVITHA SREE',          fin: 'G3467857Q', passType: "Dependant's Pass", issued: parseMOMDate('19 APR 2023'), expiry: parseMOMDate('02 MAY 2026'), relation: 'Child' },
-    ]
-  },
-  {
-    id: 2,
-    name: 'GANGULI ATANU',
-    fin: 'M4464302W',
-    passType: 'Employment Pass',
-    issued: parseMOMDate('14 SEP 2024'),
-    expiry: parseMOMDate('14 SEP 2026'),
-    submittedBy: 'RAVANASAMUDRAM NILAKANTAM NAGARAJ PRASAD',
-    status: 'Issued',
-    dependants: [
-      { name: 'GANGULI OONA', fin: 'M4466255P', passType: "Dependant's Pass", issued: parseMOMDate('14 SEP 2024'), expiry: parseMOMDate('14 SEP 2026'), relation: 'Spouse' },
-    ]
-  },
-  {
-    id: 3,
-    name: 'MABIAN VIDYADHAR SUNDER',
-    fin: 'G3897864R',
-    passType: 'Employment Pass',
-    issued: parseMOMDate('26 JUL 2024'),
-    expiry: parseMOMDate('14 OCT 2026'),
-    submittedBy: 'RAVANASAMUDRAM NILAKANTAM NAGARAJ PRASAD',
-    status: 'Issued',
-    dependants: [
-      { name: 'MABIAN SUMA SUNDER',       fin: 'M4240602X', passType: 'Long-Term Visit Pass', issued: parseMOMDate('01 AUG 2024'), expiry: parseMOMDate('14 OCT 2026'), relation: 'Spouse' },
-      { name: 'MABIAN PRITHVI VIDYADHAR', fin: 'G3913493X', passType: "Dependant's Pass",     issued: parseMOMDate('01 AUG 2024'), expiry: parseMOMDate('14 OCT 2026'), relation: 'Child' },
-      { name: 'MABIAN SHARMILA VIDYADHAR',fin: 'G3909534W', passType: "Dependant's Pass",     issued: parseMOMDate('01 AUG 2024'), expiry: parseMOMDate('14 OCT 2026'), relation: 'Child' },
-    ]
-  },
-  {
-    id: 4,
-    name: 'ROY CHOUDHURY SARMISTHA',
-    fin: 'M4605394R',
-    passType: 'Employment Pass',
-    issued: parseMOMDate('10 NOV 2025'),
-    expiry: parseMOMDate('10 NOV 2027'),
-    submittedBy: 'RAVANASAMUDRAM NILAKANTAM NAGARAJ PRASAD',
-    status: 'Issued',
-    dependants: []
-  },
-  {
-    id: 5,
-    name: 'GAURAV SINGH',
-    fin: 'G3246920K',
-    passType: 'Employment Pass',
-    issued: parseMOMDate('01 DEC 2025'),
-    expiry: parseMOMDate('01 DEC 2027'),
-    submittedBy: 'RAVANASAMUDRAM NILAKANTAM NAGARAJ PRASAD',
-    status: 'Issued',
-    dependants: [
-      { name: 'NISHA SINGH',  fin: 'G3321700K', passType: "Dependant's Pass", issued: parseMOMDate('01 DEC 2025'), expiry: parseMOMDate('01 DEC 2027'), relation: 'Spouse' },
-      { name: 'SINGH SANVI',  fin: 'G3321498M', passType: "Dependant's Pass", issued: parseMOMDate('01 DEC 2025'), expiry: parseMOMDate('01 DEC 2027'), relation: 'Child' },
-      { name: 'SINGH YUVAN',  fin: 'G4548663Q', passType: "Dependant's Pass", issued: parseMOMDate('01 DEC 2025'), expiry: parseMOMDate('01 DEC 2027'), relation: 'Child' },
-    ]
-  },
-  {
-    id: 6,
-    name: 'SARIN RISHI',
-    fin: 'G3458299N',
-    passType: 'Employment Pass',
-    issued: parseMOMDate('21 DEC 2025'),
-    expiry: parseMOMDate('21 DEC 2027'),
-    submittedBy: 'RAVANASAMUDRAM NILAKANTAM NAGARAJ PRASAD',
-    status: 'Issued',
-    dependants: [
-      { name: 'SARIN RITISHA', fin: 'G3470292L', passType: "Dependant's Pass", issued: parseMOMDate('21 DEC 2025'), expiry: parseMOMDate('21 DEC 2027'), relation: 'Dependant' },
-    ]
-  },
-  {
-    id: 7,
-    name: 'NARRA PRASAD',
-    fin: 'G5472496P',
-    passType: 'Employment Pass',
-    issued: parseMOMDate('15 AUG 2024'),
-    expiry: parseMOMDate('19 SEP 2027'),
-    submittedBy: 'RAVANASAMUDRAM NILAKANTAM NAGARAJ PRASAD',
-    status: 'Issued',
-    dependants: [
-      { name: 'NARRA SUPRAJA',        fin: 'G5473655Q', passType: "Dependant's Pass", issued: parseMOMDate('19 AUG 2024'), expiry: parseMOMDate('19 SEP 2027'), relation: 'Spouse' },
-      { name: 'NARRA KANISHK',        fin: 'G5473787X', passType: "Dependant's Pass", issued: parseMOMDate('19 AUG 2024'), expiry: parseMOMDate('19 SEP 2027'), relation: 'Child' },
-      { name: 'NARRA NIHAL VARDHAN',  fin: 'G3266519K', passType: "Dependant's Pass", issued: parseMOMDate('19 AUG 2024'), expiry: parseMOMDate('19 SEP 2027'), relation: 'Child' },
-    ]
-  },
-];
+function urgencyStripe(days) {
+  const st = statusOf(days);
+  return `<span class="urgency-stripe stripe-${st}"></span>`;
+}
+
+function titleCase(str) {
+  return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+}
+
+// ─── DATA ─────────────────────────────────────────────────────────────────────
+const EP_DATA = [];
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
 let currentFilter = 'all';
 let currentSort   = { key: 'days', dir: 1 };
 let allExpanded   = false;
+let csvLastFetched = null;
+
+// ─── CSV FILENAME (matches GitHub repo) ──────────────────────────────────────
+const CSV_FILENAME = '199701040R-00-000_Existing_Passes.csv';
+
+// ─── LOADING STATE ────────────────────────────────────────────────────────────
+function showLoadingState() {
+  document.getElementById('ep-tbody').innerHTML = '';
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('loading-state').style.display = 'block';
+}
+
+function hideLoadingState() {
+  document.getElementById('loading-state').style.display = 'none';
+}
+
+function showFetchError(msg) {
+  hideLoadingState();
+  const err = document.getElementById('fetch-error');
+  document.getElementById('fetch-error-msg').textContent = msg;
+  err.style.display = 'flex';
+}
+
+function hideFetchError() {
+  document.getElementById('fetch-error').style.display = 'none';
+}
+
+// ─── AUTO-FETCH CSV FROM GITHUB ───────────────────────────────────────────────
+async function fetchCSVFromGitHub() {
+  const url = `./${CSV_FILENAME}?_=${Date.now()}`;
+  showLoadingState();
+  hideFetchError();
+
+  // Spin the refresh button
+  const btn = document.querySelector('.refresh-btn');
+  if (btn) btn.classList.add('spinning');
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Could not load ${CSV_FILENAME} (HTTP ${res.status})`);
+    const text = await res.text();
+    const parsed = parseCSVText(text);
+    if (parsed.length === 0) throw new Error('CSV appears empty or has no valid rows');
+    const built = buildEPDataFromRows(parsed);
+    if (built.length === 0) throw new Error('No Employment Pass records found in CSV');
+
+    EP_DATA.length = 0;
+    built.forEach(ep => EP_DATA.push(ep));
+    csvLastFetched = new Date();
+
+    hideLoadingState();
+    buildCards();
+    buildTimeline();
+    buildAlert();
+    renderTable();
+    updateLastFetched();
+    showToast(`✅ Loaded ${built.length} EP holders from CSV`, 'success');
+
+  } catch (err) {
+    showFetchError(err.message);
+    console.error('CSV fetch error:', err);
+  } finally {
+    if (btn) btn.classList.remove('spinning');
+  }
+}
+
+function updateLastFetched() {
+  const el = document.getElementById('last-fetched');
+  if (el && csvLastFetched) {
+    el.textContent = 'Data loaded: ' + csvLastFetched.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', second:'2-digit' })
+      + ' · ' + csvLastFetched.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+  }
+  const fd = document.getElementById('footer-date');
+  if (fd) fd.textContent = TODAY.toLocaleDateString('en-GB', { day:'2-digit', month:'long', year:'numeric' });
+}
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 function init() {
   updateClock();
   setInterval(updateClock, 1000);
-  buildCards();
-  buildAlert();
-  renderTable();
-  document.getElementById('footer-date').textContent =
-    TODAY.toLocaleDateString('en-GB', { day:'2-digit', month:'long', year:'numeric' });
+  fetchCSVFromGitHub();
 }
 
 function updateClock() {
   const now = new Date();
   document.getElementById('live-date').textContent =
-    now.toLocaleDateString('en-GB', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
+    now.toLocaleDateString('en-GB', { weekday:'short', day:'2-digit', month:'short', year:'numeric' });
   document.getElementById('live-time').textContent =
     now.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
 }
@@ -647,11 +1398,68 @@ function buildCards() {
     const st = statusOf(daysUntil(ep.expiry));
     counts[st] = (counts[st] || 0) + 1;
   });
-  document.getElementById('c-total').textContent    = EP_DATA.length;
+  const total = EP_DATA.length;
+
+  document.getElementById('c-total').textContent    = total;
   document.getElementById('c-critical').textContent = counts.critical || 0;
   document.getElementById('c-urgent').textContent   = counts.urgent   || 0;
   document.getElementById('c-warning').textContent  = counts.warning  || 0;
   document.getElementById('c-ok').textContent       = counts.ok       || 0;
+
+  // Pill counts
+  document.getElementById('pc-all').textContent      = total;
+  document.getElementById('pc-critical').textContent = counts.critical || 0;
+  document.getElementById('pc-urgent').textContent   = counts.urgent   || 0;
+  document.getElementById('pc-warning').textContent  = counts.warning  || 0;
+  document.getElementById('pc-ok').textContent       = counts.ok       || 0;
+
+  // Progress bars
+  if (total > 0) {
+    document.getElementById('bar-critical').style.width = ((counts.critical||0)/total*100)+'%';
+    document.getElementById('bar-urgent').style.width   = ((counts.urgent||0)/total*100)+'%';
+    document.getElementById('bar-warning').style.width  = ((counts.warning||0)/total*100)+'%';
+    document.getElementById('bar-ok').style.width       = ((counts.ok||0)/total*100)+'%';
+  }
+}
+
+function buildTimeline() {
+  const grid = document.getElementById('timeline-grid');
+  if (!grid) return;
+
+  // Find date range for normalization
+  const sorted = [...EP_DATA].sort((a,b) => daysUntil(a.expiry) - daysUntil(b.expiry));
+  const minDays = daysUntil(sorted[0].expiry);
+  const maxDays = daysUntil(sorted[sorted.length-1].expiry);
+  const range   = Math.max(maxDays - minDays, 1);
+
+  grid.innerHTML = '';
+  sorted.forEach(ep => {
+    const days = daysUntil(ep.expiry);
+    const st = statusOf(days);
+    const pct = Math.min(100, Math.max(5, ((days - minDays) / range) * 100));
+    const colors = {
+      critical: 'var(--critical)',
+      urgent:   'var(--urgent)',
+      warning:  'var(--warning)',
+      ok:       'var(--ok)'
+    };
+
+    const el = document.createElement('div');
+    el.className = 'timeline-person';
+    el.onclick = () => {
+      setFilter(st);
+      document.querySelector('.table-section').scrollIntoView({ behavior: 'smooth' });
+    };
+    el.innerHTML = `
+      <div class="timeline-person-name">${titleCase(ep.name).split(' ')[0]} ${titleCase(ep.name).split(' ').slice(-1)[0]}</div>
+      <div class="timeline-bar-track">
+        <div class="timeline-bar-fill" style="width:${pct}%;background:${colors[st]};"></div>
+      </div>
+      <div class="timeline-expiry">${fmtDate(ep.expiry)}</div>
+      <div class="timeline-days-chip" style="background:${colors[st]}20;color:${colors[st]};">${days > 0 ? days+'d left' : Math.abs(days)+'d over'}</div>
+    `;
+    grid.appendChild(el);
+  });
 }
 
 function buildAlert() {
@@ -664,30 +1472,23 @@ function buildAlert() {
   const within90 = EP_DATA.filter(ep => { const d = daysUntil(ep.expiry); return d >= 0 && d <= 90; });
 
   if (critical.length > 0) {
-    banner.className = 'alert-banner alert-critical';
+    banner.className = 'alert-card alert-critical';
     icon.textContent = '🚨';
-    const names = critical.map(e => `<strong>${titleCase(e.name)}</strong>
-      (${daysUntil(e.expiry) < 0 ? 'EXPIRED' : daysUntil(e.expiry) + ' days left'})`).join(', ');
-    body.innerHTML = `<strong>URGENT: ${critical.length} Employment Pass${critical.length>1?'es':''} expiring within 30 days!</strong>
-      Immediate renewal action required for: ${names}. Note: all linked Dependant Passes expire on the same date.`;
+    const names = critical.map(e => `<strong>${titleCase(e.name)}</strong> (${daysUntil(e.expiry)<0?'EXPIRED':daysUntil(e.expiry)+'d left'})`).join(', ');
+    body.innerHTML = `<strong>URGENT: ${critical.length} Employment Pass${critical.length>1?'es':''} expiring within 30 days</strong><p>Immediate renewal action required for: ${names}. All linked Dependant Passes expire on the same date.</p>`;
     banner.style.display = 'flex';
-  } else if (urgent.length > 0 || within90.length > 0) {
-    banner.className = 'alert-banner alert-warning';
+  } else if (within90.length > 0) {
+    banner.className = 'alert-card alert-warning';
     icon.textContent = '⚠️';
     const names = within90.sort((a,b)=>daysUntil(a.expiry)-daysUntil(b.expiry)).map(e=>`<strong>${titleCase(e.name)}</strong>`).join(', ');
-    body.innerHTML = `<strong>${within90.length} pass${within90.length>1?'es':''} require renewal within 90 days.</strong>
-      Initiate MOM renewal application at least 6 weeks before expiry for: ${names}.`;
+    body.innerHTML = `<strong>${within90.length} pass${within90.length>1?'es':''} require renewal within 90 days</strong><p>Initiate MOM renewal application at least 6 weeks before expiry for: ${names}.</p>`;
     banner.style.display = 'flex';
   } else {
-    banner.className = 'alert-banner alert-ok';
+    banner.className = 'alert-card alert-ok';
     icon.textContent = '✅';
-    body.innerHTML = `<strong>All passes are valid for more than 90 days.</strong> No immediate renewal action required.`;
+    body.innerHTML = `<strong>All passes are valid for more than 90 days</strong><p>No immediate renewal action required at this time.</p>`;
     banner.style.display = 'flex';
   }
-}
-
-function titleCase(str) {
-  return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
 }
 
 // ─── FILTER + SORT ────────────────────────────────────────────────────────────
@@ -710,9 +1511,9 @@ function getSortedFiltered() {
 
   data.sort((a, b) => {
     let va, vb;
-    if      (currentSort.key === 'name')     { va = a.name;            vb = b.name; }
-    else if (currentSort.key === 'fin')      { va = a.fin;             vb = b.fin; }
-    else if (currentSort.key === 'passType') { va = a.passType;        vb = b.passType; }
+    if      (currentSort.key === 'name')     { va = a.name;             vb = b.name; }
+    else if (currentSort.key === 'fin')      { va = a.fin;              vb = b.fin; }
+    else if (currentSort.key === 'passType') { va = a.passType;         vb = b.passType; }
     else if (currentSort.key === 'issued')   { va = a.issued.getTime(); vb = b.issued.getTime(); }
     else if (currentSort.key === 'expiry')   { va = a.expiry.getTime(); vb = b.expiry.getTime(); }
     else                                     { va = a._days;            vb = b._days; }
@@ -724,29 +1525,29 @@ function getSortedFiltered() {
 
 // ─── RENDER ───────────────────────────────────────────────────────────────────
 function renderTable() {
-  const data   = getSortedFiltered();
-  const tbody  = document.getElementById('ep-tbody');
-  const empty  = document.getElementById('empty-state');
+  const data  = getSortedFiltered();
+  const tbody = document.getElementById('ep-tbody');
+  const empty = document.getElementById('empty-state');
   tbody.innerHTML = '';
 
   if (data.length === 0) { empty.style.display = 'block'; return; }
   empty.style.display = 'none';
 
   data.forEach(ep => {
-    const days   = ep._days;
-    const hasDP  = ep.dependants.length > 0;
-    const rowCls = 'ep-row';
+    const days = ep._days;
+    const hasDP = ep.dependants.length > 0;
+    const st = statusOf(days);
 
-    // EP ROW
     const tr = document.createElement('tr');
-    tr.className = rowCls;
+    tr.className = 'ep-row';
     tr.dataset.id = ep.id;
     tr.innerHTML = `
-      <td style="padding-left:16px;">
+      <td style="padding:14px 6px 14px 14px;">${urgencyStripe(days)}</td>
+      <td style="padding:14px 6px;">
         <button class="expand-toggle" id="toggle-${ep.id}"
           onclick="toggleDeps(${ep.id},event)"
-          ${hasDP ? '' : 'disabled style="opacity:0.25;cursor:default;"'}
-          title="${hasDP ? ep.dependants.length + ' dependant(s) — click to view' : 'No dependants'}">
+          ${hasDP ? '' : 'disabled style="opacity:0.2;cursor:default;"'}
+          title="${hasDP ? ep.dependants.length+' dependant(s)' : 'No dependants'}">
           ▶
         </button>
       </td>
@@ -754,32 +1555,29 @@ function renderTable() {
         <div class="emp-name">${titleCase(ep.name)}</div>
         <div class="emp-fin">${ep.fin}</div>
       </td>
-      <td style="font-family:monospace;font-size:12.5px;color:#3a4a5c;">${ep.fin}</td>
+      <td style="font-family:monospace;font-size:12px;color:var(--gray-text);">${ep.fin}</td>
       <td>${passTypeBadge(ep.passType)}</td>
-      <td style="font-size:12.5px;color:#6b7a8d;">${fmtDate(ep.issued)}</td>
-      <td style="font-weight:600;">${fmtDate(ep.expiry)}</td>
+      <td style="font-size:12.5px;color:var(--gray-text);">${fmtDate(ep.issued)}</td>
+      <td style="font-weight:600;font-size:13px;">${fmtDate(ep.expiry)}</td>
       <td>${daysHtml(days)}</td>
       <td>${badgeHtml(days)}</td>
       <td>
         ${hasDP
-          ? `<span class="dep-chip" onclick="toggleDeps(${ep.id},event)">👨‍👩‍👧 ${ep.dependants.length} Dependant${ep.dependants.length>1?'s':''}</span>`
-          : `<span style="color:#ccc;font-size:12px;">None</span>`}
+          ? `<span class="dep-chip" onclick="toggleDeps(${ep.id},event)">👨‍👩‍👧 ${ep.dependants.length} Dep${ep.dependants.length>1?'s':''}</span>`
+          : `<span style="color:#ccc;font-size:12px;">—</span>`}
       </td>
     `;
     tr.onclick = e => { if (!e.target.closest('button') && !e.target.closest('.dep-chip')) toggleDeps(ep.id, e); };
     tbody.appendChild(tr);
 
-    // DP SECTION
     if (hasDP) {
       const dpGroup = document.createElement('tbody');
       dpGroup.className = 'dp-section';
       dpGroup.id = `dp-${ep.id}`;
 
       const hdrRow = document.createElement('tr');
-      hdrRow.innerHTML = `<td colspan="9">↳ Dependant Pass Holders for ${titleCase(ep.name)}</td>`;
       hdrRow.className = '';
-      hdrRow.querySelector('td').className = '';
-      hdrRow.querySelector('td').style.cssText = 'padding:9px 14px 9px 54px;background:#eef4ff;font-size:11px;font-weight:700;color:#0d5ea6;text-transform:uppercase;letter-spacing:0.6px;border-bottom:1px solid #dde8f5;';
+      hdrRow.innerHTML = `<td colspan="10" style="padding:9px 16px 9px 60px;background:#F0F7F4;font-size:10.5px;font-weight:700;color:var(--green-mid);text-transform:uppercase;letter-spacing:0.8px;border-bottom:1px solid rgba(27,77,62,0.1);">↳ Dependant Pass Holders — ${titleCase(ep.name)}</td>`;
       dpGroup.appendChild(hdrRow);
 
       ep.dependants.forEach(dp => {
@@ -787,15 +1585,16 @@ function renderTable() {
         const drow = document.createElement('tr');
         drow.className = 'dp-row';
         drow.innerHTML = `
+          <td style="padding:11px 6px 11px 14px;">${urgencyStripe(ddys)}</td>
           <td></td>
           <td>
             <div class="emp-name">${titleCase(dp.name)}</div>
             <span class="rel-badge rel-${dp.relation}">${dp.relation}</span>
           </td>
-          <td style="font-family:monospace;font-size:12px;color:#6b7a8d;">${dp.fin}</td>
+          <td style="font-family:monospace;font-size:12px;color:var(--gray-text);">${dp.fin}</td>
           <td>${passTypeBadge(dp.passType)}</td>
-          <td style="font-size:12.5px;color:#6b7a8d;">${fmtDate(dp.issued)}</td>
-          <td style="font-weight:600;">${fmtDate(dp.expiry)}</td>
+          <td style="font-size:12.5px;color:var(--gray-text);">${fmtDate(dp.issued)}</td>
+          <td style="font-weight:600;font-size:13px;">${fmtDate(dp.expiry)}</td>
           <td>${daysHtml(ddys)}</td>
           <td>${badgeHtml(ddys)}</td>
           <td>—</td>
@@ -834,9 +1633,14 @@ function toggleAll() {
 
 function setFilter(f) {
   currentFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => b.className = 'filter-btn');
+  document.querySelectorAll('.pill').forEach(b => {
+    b.className = 'pill';
+  });
+  document.querySelectorAll('.metric-card').forEach(mc => mc.classList.remove('active-filter'));
   const btn = document.getElementById(`btn-${f}`);
-  if (btn) { btn.classList.add('active'); if (f !== 'all') btn.classList.add(`active-${f}`); }
+  if (btn) btn.classList.add(`pill-active-${f}`);
+  const mc = document.getElementById(`mc-${f}`);
+  if (mc) mc.classList.add('active-filter');
   renderTable();
 }
 
@@ -846,20 +1650,16 @@ function sortBy(key) {
   document.querySelectorAll('thead th').forEach(th => th.classList.remove('sorted'));
   const arrowId = `sa-${key}`;
   const arrow = document.getElementById(arrowId);
-  if (arrow) { arrow.closest('th').classList.add('sorted'); arrow.textContent = currentSort.dir === 1 ? '↑' : '↓'; }
+  if (arrow) {
+    arrow.closest('th').classList.add('sorted');
+    arrow.textContent = currentSort.dir === 1 ? '↑' : '↓';
+  }
   renderTable();
 }
 
 // ─── CSV UPLOAD ───────────────────────────────────────────────────────────────
-
-// Drag-and-drop handlers
-function onDragOver(e) {
-  e.preventDefault();
-  document.getElementById('upload-zone').classList.add('dragover');
-}
-function onDragLeave(e) {
-  document.getElementById('upload-zone').classList.remove('dragover');
-}
+function onDragOver(e) { e.preventDefault(); document.getElementById('upload-zone').classList.add('dragover'); }
+function onDragLeave(e) { document.getElementById('upload-zone').classList.remove('dragover'); }
 function onDrop(e) {
   e.preventDefault();
   document.getElementById('upload-zone').classList.remove('dragover');
@@ -869,7 +1669,6 @@ function onDrop(e) {
 function handleFileInput(e) {
   const file = e.target.files[0];
   if (file) processFile(file);
-  // reset input so same file can be re-uploaded
   e.target.value = '';
 }
 
@@ -884,45 +1683,29 @@ function processFile(file) {
       if (parsed.length === 0) { showToast('❌ No valid rows found in CSV', 'error'); return; }
       const built = buildEPDataFromRows(parsed);
       if (built.length === 0) { showToast('❌ No Employment Pass records found', 'error'); return; }
-      // Update global data
       EP_DATA.length = 0;
       built.forEach(ep => EP_DATA.push(ep));
-      // Reset UI state
-      currentFilter = 'all';
-      allExpanded   = false;
+      currentFilter = 'all'; allExpanded = false;
       document.getElementById('search-input').value = '';
-      document.querySelectorAll('.filter-btn').forEach(b => b.className = 'filter-btn');
-      const btnAll = document.getElementById('btn-all');
-      if (btnAll) btnAll.classList.add('active');
-      // Refresh everything
-      buildCards();
-      buildAlert();
-      renderTable();
-      // Show loaded tag
+      document.querySelectorAll('.pill').forEach(b => b.className = 'pill');
+      document.getElementById('btn-all').classList.add('pill-active-all');
+      buildCards(); buildTimeline(); buildAlert(); renderTable();
       document.getElementById('file-loaded-tag').style.display = 'flex';
       document.getElementById('file-name-label').textContent   = file.name;
       document.getElementById('upload-hint').style.display     = 'none';
       showToast(`✅ Loaded ${built.length} EP holder${built.length>1?'s':''} from ${file.name}`, 'success');
     } catch(err) {
       showToast('❌ Error parsing CSV: ' + err.message, 'error');
-      console.error(err);
     }
   };
   reader.readAsText(file);
 }
 
-// ── Parse CSV text → array of row objects ────────────────────────────────────
 function parseCSVText(text) {
   const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
   if (lines.length < 2) return [];
-
-  // Detect delimiter (comma or tab)
   const delim = lines[0].includes('\t') ? '\t' : ',';
-
-  // Parse header
   const headers = splitCSVRow(lines[0], delim).map(h => h.trim().toLowerCase());
-
-  // Find column indices (flexible matching)
   function col(candidates) {
     for (const c of candidates) {
       const idx = headers.findIndex(h => h.includes(c));
@@ -930,160 +1713,86 @@ function parseCSVText(text) {
     }
     return -1;
   }
-  const iName      = col(['name']);
-  const iFIN       = col(['fin']);
-  const iIssued    = col(['issuance', 'issued', 'issue date']);
-  const iExpiry    = col(['expiry', 'expiration', 'expire']);
-  const iPassType  = col(['pass type', 'passtype', 'type']);
-  const iSubmitter = col(['submitted by', 'submitter', 'submitted']);
-  const iStatus    = col(['status']);
-
-  if (iName < 0 || iExpiry < 0 || iPassType < 0) {
-    throw new Error('Could not find required columns (Name, Pass type, Date of expiry)');
-  }
-
+  const iName=col(['name']), iFIN=col(['fin']), iIssued=col(['issuance','issued']),
+        iExpiry=col(['expiry','expiration']), iPassType=col(['pass type','passtype','type']),
+        iSubmitter=col(['submitted by','submitter']), iStatus=col(['status']);
+  if (iName<0||iExpiry<0||iPassType<0) throw new Error('Could not find required columns');
   const rows = [];
-  for (let i = 1; i < lines.length; i++) {
-    const cells = splitCSVRow(lines[i], delim).map(c => c.trim());
-    if (cells.length < 3) continue;
-    const name     = cells[iName]      || '';
-    const fin      = iFIN >= 0       ? (cells[iFIN]      || '') : '';
-    const issued   = iIssued >= 0    ? (cells[iIssued]   || '') : '';
-    const expiry   = cells[iExpiry]  || '';
-    const passType = cells[iPassType]|| '';
-    const submitter= iSubmitter >= 0 ? (cells[iSubmitter]|| '') : '';
-    const status   = iStatus >= 0    ? (cells[iStatus]   || '') : 'Issued';
-    if (!name || !expiry || !passType) continue;
-    rows.push({ name, fin, issued, expiry, passType, submitter, status });
+  for (let i=1;i<lines.length;i++) {
+    const cells=splitCSVRow(lines[i],delim).map(c=>c.trim());
+    if(cells.length<3)continue;
+    rows.push({
+      name:cells[iName]||'',fin:iFIN>=0?cells[iFIN]||'':'',
+      issued:iIssued>=0?cells[iIssued]||'':'',expiry:cells[iExpiry]||'',
+      passType:cells[iPassType]||'',submitter:iSubmitter>=0?cells[iSubmitter]||'':'',
+      status:iStatus>=0?cells[iStatus]||'Issued':'Issued'
+    });
   }
-  return rows;
+  return rows.filter(r=>r.name&&r.expiry&&r.passType);
 }
 
-// Split a CSV row respecting quoted fields
 function splitCSVRow(line, delim) {
-  if (delim === '\t') return line.split('\t');
-  const result = []; let cur = ''; let inQ = false;
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (ch === '"') { inQ = !inQ; }
-    else if (ch === delim && !inQ) { result.push(cur); cur = ''; }
-    else { cur += ch; }
+  if (delim==='\t') return line.split('\t');
+  const result=[]; let cur=''; let inQ=false;
+  for(let i=0;i<line.length;i++){
+    const ch=line[i];
+    if(ch==='"'){inQ=!inQ;}
+    else if(ch===delim&&!inQ){result.push(cur);cur='';}
+    else{cur+=ch;}
   }
-  result.push(cur);
-  return result;
+  result.push(cur); return result;
 }
 
-// ── Group rows into EP_DATA structure ─────────────────────────────────────────
-// Strategy: EP holders identified by pass type = "Employment Pass".
-// DPs/LTVPs are linked to an EP holder when they share the same
-// (submitter + expiry date). Falls back to surname matching if needed.
 function buildEPDataFromRows(rows) {
-  const epRows = rows.filter(r => r.passType === 'Employment Pass');
-  const dpRows = rows.filter(r => r.passType !== 'Employment Pass');
-
-  // Build a map keyed by "submitter||expiry" → EP holder
-  const epMap = new Map(); // key → ep row
-  epRows.forEach(ep => {
-    const key = (ep.submitter + '||' + ep.expiry).toLowerCase();
-    if (!epMap.has(key)) epMap.set(key, ep);
-    else {
-      // Two EPs with same submitter+expiry: use unique key per FIN
-      epMap.set((ep.submitter + '||' + ep.expiry + '||' + ep.fin).toLowerCase(), ep);
-    }
+  const epRows=rows.filter(r=>r.passType==='Employment Pass');
+  const dpRows=rows.filter(r=>r.passType!=='Employment Pass');
+  const epMap=new Map();
+  epRows.forEach(ep=>{
+    const key=(ep.submitter+'||'+ep.expiry).toLowerCase();
+    if(!epMap.has(key))epMap.set(key,ep);
+    else epMap.set((ep.submitter+'||'+ep.expiry+'||'+ep.fin).toLowerCase(),ep);
   });
-
-  // Assign each DP to an EP
-  const dpByEP = new Map(); // epFIN → [dp rows]
-  dpRows.forEach(dp => {
-    const key = (dp.submitter + '||' + dp.expiry).toLowerCase();
-    let epRow = epMap.get(key);
-
-    // Fallback: if no exact match, try surname matching against all EPs
-    if (!epRow) {
-      const dpSurname = dp.name.split(' ')[0].toLowerCase();
-      epRow = epRows.find(ep => ep.name.toLowerCase().startsWith(dpSurname));
-    }
-
-    if (epRow) {
-      const list = dpByEP.get(epRow.fin) || [];
-      list.push(dp);
-      dpByEP.set(epRow.fin, list);
-    }
-    // If still no match, DP is orphaned — skip silently
+  const dpByEP=new Map();
+  dpRows.forEach(dp=>{
+    const key=(dp.submitter+'||'+dp.expiry).toLowerCase();
+    let epRow=epMap.get(key);
+    if(!epRow){const s=dp.name.split(' ')[0].toLowerCase();epRow=epRows.find(ep=>ep.name.toLowerCase().startsWith(s));}
+    if(epRow){const list=dpByEP.get(epRow.fin)||[];list.push(dp);dpByEP.set(epRow.fin,list);}
   });
-
-  // Build final EP_DATA
-  return epRows.map((ep, idx) => ({
-    id:          idx + 1,
-    name:        ep.name,
-    fin:         ep.fin,
-    passType:    ep.passType,
-    issued:      parseMOMDate(ep.issued)  || new Date(),
-    expiry:      parseMOMDate(ep.expiry)  || new Date(),
-    submittedBy: ep.submitter,
-    status:      ep.status,
-    dependants:  (dpByEP.get(ep.fin) || []).map(dp => ({
-      name:     dp.name,
-      fin:      dp.fin,
-      passType: dp.passType,
-      issued:   parseMOMDate(dp.issued)  || new Date(),
-      expiry:   parseMOMDate(dp.expiry)  || new Date(),
-      relation: 'Dependant',
+  return epRows.map((ep,idx)=>({
+    id:idx+1,name:ep.name,fin:ep.fin,passType:ep.passType,
+    issued:parseMOMDate(ep.issued)||new Date(),expiry:parseMOMDate(ep.expiry)||new Date(),
+    submittedBy:ep.submitter,status:ep.status,
+    dependants:(dpByEP.get(ep.fin)||[]).map(dp=>({
+      name:dp.name,fin:dp.fin,passType:dp.passType,
+      issued:parseMOMDate(dp.issued)||new Date(),expiry:parseMOMDate(dp.expiry)||new Date(),
+      relation:'Dependant'
     }))
   }));
 }
 
-// Clear upload — restore built-in data
-const BUILTIN_DATA = JSON.parse(JSON.stringify([])); // will be populated after init
-let _builtinEPData = null;
-
-function clearUpload() {
-  if (!_builtinEPData) return;
-  EP_DATA.length = 0;
-  _builtinEPData.forEach(ep => EP_DATA.push(ep));
-  // dates were lost in JSON clone, so rebuild from original
-  EP_DATA.forEach((ep, i) => {
-    ep.issued  = _builtinEPData[i]._issuedMs  ? new Date(_builtinEPData[i]._issuedMs)  : ep.issued;
-    ep.expiry  = _builtinEPData[i]._expiryMs  ? new Date(_builtinEPData[i]._expiryMs)  : ep.expiry;
-    ep.dependants.forEach((dp, j) => {
-      dp.issued = _builtinEPData[i].dependants[j]._issuedMs ? new Date(_builtinEPData[i].dependants[j]._issuedMs) : dp.issued;
-      dp.expiry = _builtinEPData[i].dependants[j]._expiryMs ? new Date(_builtinEPData[i].dependants[j]._expiryMs) : dp.expiry;
-    });
-  });
-  currentFilter = 'all'; allExpanded = false;
-  document.getElementById('search-input').value = '';
-  document.querySelectorAll('.filter-btn').forEach(b => b.className = 'filter-btn');
-  const btnAll = document.getElementById('btn-all');
-  if (btnAll) btnAll.classList.add('active');
-  document.getElementById('file-loaded-tag').style.display = 'none';
-  document.getElementById('upload-hint').style.display     = '';
-  buildCards(); buildAlert(); renderTable();
-  showToast('↩ Restored built-in data', 'success');
+let _builtinEPData=null;
+function clearUpload(){
+  currentFilter='all';allExpanded=false;
+  document.getElementById('search-input').value='';
+  document.querySelectorAll('.pill').forEach(b=>b.className='pill');
+  document.getElementById('btn-all').classList.add('pill-active-all');
+  document.getElementById('file-loaded-tag').style.display='none';
+  document.getElementById('upload-hint').style.display='';
+  fetchCSVFromGitHub();
+  showToast('↩ Reloading from GitHub…','success');
 }
 
-// ── Toast notification ────────────────────────────────────────────────────────
-let _toastTimer = null;
-function showToast(msg, type) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className   = `toast toast-${type} show`;
-  if (_toastTimer) clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => { t.classList.remove('show'); }, 3500);
+let _toastTimer=null;
+function showToast(msg,type){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=`toast toast-${type} show`;
+  if(_toastTimer)clearTimeout(_toastTimer);
+  _toastTimer=setTimeout(()=>t.classList.remove('show'),3500);
 }
 
 init();
 
-// Snapshot built-in data after init (so dates are Date objects) for reset
-_builtinEPData = EP_DATA.map(ep => ({
-  ...ep,
-  _issuedMs:  ep.issued.getTime(),
-  _expiryMs:  ep.expiry.getTime(),
-  dependants: ep.dependants.map(dp => ({
-    ...dp,
-    _issuedMs: dp.issued.getTime(),
-    _expiryMs: dp.expiry.getTime(),
-  }))
-}));
 </script>
 </body>
 </html>
